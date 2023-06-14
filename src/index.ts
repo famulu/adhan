@@ -403,7 +403,6 @@ export class Adhan {
     var q = DMath.fixAngle(280.459 + 0.98564736 * D);
     var L = DMath.fixAngle(q + 1.915 * DMath.sin(g) + 0.02 * DMath.sin(2 * g));
 
-    var R = 1.00014 - 0.01671 * DMath.cos(g) - 0.00014 * DMath.cos(2 * g);
     var e = 23.439 - 0.00000036 * D;
 
     var RA = DMath.arctan2(DMath.cos(e) * DMath.sin(L), DMath.cos(L)) / 15;
@@ -622,9 +621,9 @@ export class Adhan {
 
   // get local time zone
   private getTimeZone(date: InputDateTuple): number {
-    var year = date[0];
-    var t1 = this.gmtOffset([year, 0, 1]);
-    var t2 = this.gmtOffset([year, 6, 1]);
+    const year = date[0];
+    const t1 = this.gmtOffset([year, 0, 1]);
+    const t2 = this.gmtOffset([year, 6, 1]);
     return Math.min(t1, t2);
   }
 
