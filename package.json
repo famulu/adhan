@@ -1,7 +1,7 @@
 {
-  "name": "adhan",
+  "name": "adhan-clock",
   "version": "1.0.0",
-  "description": "Adhan is a prayer times calculation library for Muslims",
+  "description": "adhan-clock is a prayer times calculation library for Muslims",
   "main": "./dist/index.js",
   "type": "module",
   "files": ["dist"],
