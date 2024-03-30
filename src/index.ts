@@ -20,40 +20,8 @@ PLEASE DO NOT REMOVE THIS COPYRIGHT BLOCK.
 
 */
 
-//--------------------- Help and Manual ----------------------
-/*
-
-User's Manual:
-http://praytimes.org/manual
-
-Calculation Formulas:
-http://praytimes.org/calculation
-
-
-
-//------------------------ User Interface -------------------------
-
-
-	getTimes (date, coordinates [, timeZone [, dst [, timeFormat]]])
-
-	setMethod (method)       // set calculation method
-	adjust (parameters)      // adjust calculation parameters
-	tune (offsets)           // tune times by given offsets
-
-	getMethod ()             // get calculation method
-	getSetting ()            // get current calculation parameters
-	getOffsets ()            // get current time offsets
-
-
-//------------------------- Sample Usage --------------------------
-
-
-	var PT = new PrayTimes('ISNA');
-	var times = PT.getTimes(new Date(), [43, -80], -5);
-	document.write('Sunrise = '+ times.sunrise)
-
-
-*/
+// Calculation Formulas:
+// http://praytimes.org/calculation
 
 /* Types */
 
@@ -151,111 +119,109 @@ type CalculationMethods = {
 
 //----------------------- PrayTimes Class ------------------------
 export class Adhan {
-  //------------------------ Constants --------------------------
-  // Time Names
-  private static readonly timeNames = {
-    imsak: "Imsak",
-    fajr: "Fajr",
-    sunrise: "Sunrise",
-    dhuhr: "Dhuhr",
-    asr: "Asr",
-    sunset: "Sunset",
-    maghrib: "Maghrib",
-    isha: "Isha",
-    midnight: "Midnight",
-  };
-
   // Calculation Methods
   private static readonly methods = {
     MWL: {
       name: "Muslim World League",
-      params: { fajr: 18, isha: 17 },
+      params: {
+        fajr: 18,
+        isha: 17,
+        maghrib: "0 min",
+        midnight: "Standard",
+      },
     },
     ISNA: {
       name: "Islamic Society of North America (ISNA)",
-      params: { fajr: 15, isha: 15 },
+      params: {
+        fajr: 15,
+        isha: 15,
+        maghrib: "0 min",
+        midnight: "Standard",
+      },
     },
     Egypt: {
       name: "Egyptian General Authority of Survey",
-      params: { fajr: 19.5, isha: 17.5 },
+      params: {
+        fajr: 19.5,
+        isha: 17.5,
+        maghrib: "0 min",
+        midnight: "Standard",
+      },
     },
     Makkah: {
       name: "Umm Al-Qura University, Makkah",
-      params: { fajr: 18.5, isha: "90 min" }, // fajr was 19 degrees before 1430 hijri
+      params: {
+        fajr: 18.5,
+        isha: "90 min",
+        maghrib: "0 min",
+        midnight: "Standard",
+      },
     },
     Karachi: {
       name: "University of Islamic Sciences, Karachi",
-      params: { fajr: 18, isha: 18 },
+      params: {
+        fajr: 18,
+        isha: 18,
+        maghrib: "0 min",
+        midnight: "Standard",
+      },
     },
     Tehran: {
       name: "Institute of Geophysics, University of Tehran",
-      params: { fajr: 17.7, isha: 14, maghrib: 4.5, midnight: "Jafari" }, // isha is not explicitly specified in this method
+      params: {
+        fajr: 17.7,
+        isha: 14,
+        maghrib: 4.5,
+        midnight: "Jafari",
+      },
     },
     Jafari: {
       name: "Shia Ithna-Ashari, Leva Institute, Qum",
-      params: { fajr: 16, isha: 14, maghrib: 4, midnight: "Jafari" },
+      params: {
+        fajr: 16,
+        isha: 14,
+        maghrib: 4,
+        midnight: "Jafari",
+      },
     },
   } as CalculationMethods;
-
-  // Default Parameters in Calculation Methods
-  private static readonly defaultParams = {
-    maghrib: "0 min",
-    midnight: "Standard" as MidnightMethods,
-  };
-
-  //---------------------- Default Settings --------------------
 
   private calcMethod: CalculationMethodsNames = "MWL";
 
   // do not change anything here; use adjust method instead
-  private setting = {
+  private setting: Setting = {
     imsak: "10 min",
     dhuhr: "0 min",
     asr: "Standard",
     highLats: "NightMiddle",
-  } as Setting;
+    fajr: 18,
+    isha: 17,
+    maghrib: "0 min",
+    midnight: "Standard",
+  };
 
   private timeFormat: TimeFormats = "24h";
   private readonly timeSuffixes: readonly [string, string] = ["am", "pm"];
   private readonly invalidTime = "-----";
 
   private numIterations = 1;
-  private offset = {} as NumberPrayerTimes;
-
-  //----------------------- Local Variables ---------------------
+  private offset: NumberPrayerTimes = {
+    imsak: 0,
+    fajr: 0,
+    sunrise: 0,
+    dhuhr: 0,
+    asr: 0,
+    sunset: 0,
+    maghrib: 0,
+    isha: 0,
+    midnight: 0,
+  };
 
   lat: any;
   lng: any;
   elv!: number; // coordinates
   timeZone: any;
   jDate!: number; // time variables
-
-  //---------------------- Initialization -----------------------
-  constructor() {
-    let method: CalculationMethodsNames | undefined = undefined;
-    // set methods defaults
-    const defParams = Adhan.defaultParams;
-    for (const i in Adhan.methods) {
-      const params = Adhan.methods[i as CalculationMethodsNames].params;
-      let j: keyof typeof Adhan.defaultParams;
-      for (j in defParams)
-        if (typeof params[j] === "undefined")
-          (params[j] as string) = defParams[j];
-    }
-
-    // initialize settings
-    this.calcMethod = method || this.calcMethod;
-    const params = Adhan.methods[this.calcMethod].params;
-    let id: keyof typeof params;
-    for (id in params) {
-      (this.setting[id] as string | number) = params[id];
-    }
-    // init time offsets
-    let i: keyof typeof Adhan.timeNames;
-    for (i in Adhan.timeNames) this.offset[i] = 0;
-  }
-
-  //----------------------- Public Functions ------------------------
 
   // set calculation method
   setMethod(method: CalculationMethodsNames): void {
