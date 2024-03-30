@@ -1,6 +1,6 @@
 {
   "name": "adhan-clock",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "adhan-clock is a prayer times calculation library for Muslims",
   "main": "./dist/index.js",
   "type": "module",
@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite example",
     "build": "tsc && vite build",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
